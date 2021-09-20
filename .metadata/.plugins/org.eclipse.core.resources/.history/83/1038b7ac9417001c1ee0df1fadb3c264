@@ -1,0 +1,10 @@
+package com.dbs.ordermatching.repo;
+
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+import com.dbs.ordermatching.model.TradeHistory;
+@Repository
+public interface TradeHistoryRepository extends CrudRepository<TradeHistory, String> {
+
+}

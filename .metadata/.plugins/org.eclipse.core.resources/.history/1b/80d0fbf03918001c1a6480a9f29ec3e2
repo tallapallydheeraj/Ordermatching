@@ -1,0 +1,41 @@
+package com.dbs.ordermatching.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.dbs.ordermatching.model.ClientInstrument;
+import com.dbs.ordermatching.repo.TradeHistoryRepository;
+
+@Service
+public class TradeHistoryService {
+	@Autowired
+	private TradeHistoryRepository threpo;
+	@Autowired
+	private InstrumentService iservice;
+	@Autowired
+	private ClientService cservice;
+	@Autowired
+	private ClientInstrumentService ciservice;
+	public boolean insertClientInstrument(String cid,
+			String iid, int quantity,char type) throws Exception {
+		String ciid=cid+iid;
+		if(ciservice.existsById(ciid)) {
+			ClientInstrument ci= ciservice.findClientInstrumentById(ciid);
+			if(type=='S')
+				ci.setQuantity(ci.getQuantity()-quantity);
+			else
+				ci.setQuantity(ci.getQuantity()+quantity);
+			ciservice.updateClientInstrument(ci);
+		}
+		else {
+			ClientInstrument ci= new ClientInstrument();
+			ci.setClientInstrumentId(ciid);
+			ci.setClient(cservice.findClientById(cid));
+			ci.setInstrument(iservice.findInstrumentById(iid));
+			ci.setQuantity(quantity);
+			ciservice.updateClientInstrument(ci);
+		}
+		
+		return true;
+	}
+}

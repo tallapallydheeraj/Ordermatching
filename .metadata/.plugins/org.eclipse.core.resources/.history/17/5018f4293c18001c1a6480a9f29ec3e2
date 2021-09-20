@@ -1,0 +1,135 @@
+package com.dbs.ordermatching.service;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.dbs.ordermatching.model.Buy;
+import com.dbs.ordermatching.model.ClientInstrument;
+import com.dbs.ordermatching.model.Sell;
+import com.dbs.ordermatching.model.TradeHistory;
+import com.dbs.ordermatching.repo.BuyRepository;
+import com.dbs.ordermatching.repo.ClientInstrumentRepository;
+import com.dbs.ordermatching.repo.ClientRepository;
+import com.dbs.ordermatching.repo.InstrumentRepository;
+import com.dbs.ordermatching.repo.SellRepository;
+import com.dbs.ordermatching.repo.TradeHistoryRepository;
+
+@Service
+public class SellService {
+	
+	@Autowired
+	private BuyRepository brepo;
+	@Autowired
+	private SellRepository srepo;
+	@Autowired
+	private ClientRepository crepo;
+	@Autowired
+	private ClientInstrumentRepository cirepo;
+	@Autowired
+	private TradeHistoryRepository threpo;
+	@Autowired
+	private InstrumentRepository irepo;
+	@Autowired
+	private EntityManager manager;
+	/*@SuppressWarnings("unchecked")
+	public List<?> insertBuy(String cid, String iid, Double p, Integer q) {
+		return manager.createNamedStoredProcedureQuery("INTO_BUY").setParameter("cid", cid)
+		.setParameter("iid",iid)
+		.setParameter("p", p)
+		.setParameter("q", q)
+		.getResultList();
+		
+	}*/
+	public void insertSSell(String cid,String iid, Double p, Integer q) {
+		int sid=(int)this.srepo.count()+1;
+		this.srepo.insertSell(sid,cid, iid, p, q);
+		List<Integer> l= this.srepo.sOrderMatching(iid, p);
+		int quan=q;
+		
+		//System.out.println(bid);
+		Sell s=this.srepo.findById(sid).get();
+		System.out.println("sell test" + s);
+		while(quan>0 && l.size()>0) {
+			Buy b= this.brepo.findById(l.get(0)).get();
+			if(b.getRemainingQty()>=s.getRemainingQty()) {
+				b.setRemainingQty(b.getRemainingQty()-s.getRemainingQty());
+				int bquant=b.getRemainingQty();
+				s.setRemainingQty(0);
+				s.setFlag(0);
+				if(b.getRemainingQty()==0)
+				{
+					b.setFlag(0);
+					this.insertClientInstrument(b.getClient().getClientId(), b.getInstrument().getInstrumentId(), quan, 'B');
+				}
+				else {
+					this.insertClientInstrument(b.getClient().getClientId(), b.getInstrument().getInstrumentId(), quan, 'B');
+				}
+				this.insertClientInstrument(s.getClient().getClientId(), iid, quan, 'S');
+				this.insertTradeHistory(l.get(0),sid,  iid, p, quan);
+				quan=0;
+			}
+			else {//buyer>seller
+				s.setRemainingQty(s.getRemainingQty()-b.getRemainingQty());
+				int bquant=b.getRemainingQty();
+				quan=quan-bquant;
+				b.setRemainingQty(0);
+				b.setFlag(0);
+				this.insertClientInstrument(b.getClient().getClientId(), iid, bquant, 'B');
+				this.insertClientInstrument(s.getClient().getClientId(), iid, bquant, 'S');
+				this.insertTradeHistory( l.get(0),sid, iid, p, bquant);
+				
+			}
+			brepo.save(b);
+			srepo.save(s);
+			l.remove(0);
+		}
+	}
+	
+	public List<Sell> getSell(){
+		List<Sell> s=new ArrayList<>();
+		 this.srepo.findAll().forEach(ele->s.add(ele));
+		 return s;
+	}
+	public boolean insertTradeHistory(int bid,int sid,String iid,
+			double price,
+			int quantity) {
+		TradeHistory th = new TradeHistory();
+		th.setBuyer(brepo.findById(bid).get().getClient());
+		th.setSeller(srepo.findById(sid).get().getClient());
+		th.setInstrument(irepo.findById(iid).get());
+		th.setPrice(price);
+		th.setQuantity(quantity);
+		th.setTradeDate(LocalDateTime.now());
+		threpo.save(th);
+		return true;
+	}
+	public boolean insertClientInstrument(String cid,
+			String iid, int quantity,char type) {
+		String ciid=cid+iid;
+		if(cirepo.existsById(ciid)) {
+			ClientInstrument ci= cirepo.findById(ciid).get();
+			if(type=='B')
+				ci.setQuantity(ci.getQuantity()-quantity);
+			else
+				ci.setQuantity(ci.getQuantity()+quantity);
+			cirepo.save(ci);
+		}
+		else {
+			ClientInstrument ci= new ClientInstrument();
+			ci.setClientInstrumentId(ciid);
+			ci.setClient(crepo.findById(cid).get());
+			ci.setInstrument(irepo.findById(iid).get());
+			ci.setQuantity(quantity);
+			cirepo.save(ci);
+		}
+		
+		return true;
+	}
+	
+}

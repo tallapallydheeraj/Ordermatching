@@ -1,0 +1,134 @@
+package com.dbs.ordermatching.service;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import javax.crypto.Cipher;
+import javax.persistence.EntityManager;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Service;
+
+import com.dbs.ordermatching.model.Buy;
+import com.dbs.ordermatching.model.ClientInstrument;
+import com.dbs.ordermatching.model.Sell;
+import com.dbs.ordermatching.model.TradeHistory;
+import com.dbs.ordermatching.repo.BuyRepository;
+import com.dbs.ordermatching.repo.ClientInstrumentRepository;
+import com.dbs.ordermatching.repo.ClientRepository;
+import com.dbs.ordermatching.repo.InstrumentRepository;
+import com.dbs.ordermatching.repo.SellRepository;
+import com.dbs.ordermatching.repo.TradeHistoryRepository;
+@Service
+public class BuyService {
+	@Autowired
+	private BuyRepository brepo;
+	@Autowired
+	private SellRepository srepo;
+	@Autowired
+	private ClientService cservice;
+	@Autowired
+	private ClientInstrumentService ciservice;
+	@Autowired
+	private TradeHistoryRepository threpo;
+	@Autowired
+	private InstrumentService iservice;
+	/*@SuppressWarnings("unchecked")
+	public List<?> insertBuy(String cid, String iid, Double p, Integer q) {
+		return manager.createNamedStoredProcedureQuery("INTO_BUY").setParameter("cid", cid)
+		.setParameter("iid",iid)
+		.setParameter("p", p)
+		.setParameter("q", q)
+		.getResultList();
+		
+	}*/
+	public void insertSBuy(String cid,String iid, Double p, Integer q) throws Exception {
+		int bid=(int)this.brepo.count()+1;
+		this.brepo.insertBuy(bid,cid, iid, p, q);
+		List<Integer> l= this.brepo.bOrderMatching(iid, p);
+		int quan=q;
+		
+		//System.out.println(bid);
+		Buy b=this.brepo.findById(bid).get();
+		System.out.println("buy test" + b);
+		while(quan>0 && l.size()>0) {
+			Sell s= this.srepo.findById(l.get(0)).get();
+			if(s.getRemainingQty()>=b.getRemainingQty()) {
+				s.setRemainingQty(s.getRemainingQty()-b.getRemainingQty());
+				int squant=s.getRemainingQty();
+				b.setRemainingQty(0);
+				b.setFlag(0);
+				if(s.getRemainingQty()==0)
+				{
+					s.setFlag(0);
+					this.insertClientInstrument(s.getClient().getClientId(), s.getInstrument().getInstrumentId(), quan, 'S');
+				}
+				else {
+					this.insertClientInstrument(s.getClient().getClientId(), s.getInstrument().getInstrumentId(), quan, 'S');
+				}
+				this.insertClientInstrument(b.getClient().getClientId(), iid, quan, 'B');
+				this.insertTradeHistory(bid, l.get(0), iid, p, quan);
+				quan=0;
+			}
+			else {//buyer>seller
+				b.setRemainingQty(b.getRemainingQty()-s.getRemainingQty());
+				int squant=s.getRemainingQty();
+				quan=quan-squant;
+				s.setRemainingQty(0);
+				s.setFlag(0);
+				this.insertClientInstrument(s.getClient().getClientId(), iid, squant, 'S');
+				this.insertClientInstrument(b.getClient().getClientId(), iid, squant, 'B');
+				this.insertTradeHistory(bid, l.get(0), iid, p, squant);
+				
+			}
+			brepo.save(b);
+			srepo.save(s);
+			l.remove(0);
+		}
+	}
+	
+	public List<Buy> getBuy(){
+		List<Buy> b=new ArrayList<>();
+		 this.brepo.findAll().forEach(ele->b.add(ele));
+		 return b;
+	}
+	public boolean insertTradeHistory(int bid,int sid,String iid,
+			double price,
+			int quantity) throws Exception {
+		TradeHistory th = new TradeHistory();
+		th.setBuyer(brepo.findById(bid).get().getClient());
+		th.setSeller(srepo.findById(sid).get().getClient());
+		th.setInstrument(iservice.findInstrumentById(iid));
+		th.setPrice(price);
+		th.setQuantity(quantity);
+		th.setTradeDate(LocalDateTime.now());
+		threpo.save(th);
+		return true;
+	}
+	public boolean insertClientInstrument(String cid,
+			String iid, int quantity,char type) throws Exception {
+		String ciid=cid+iid;
+		if(ciservice.existsById(ciid)) {
+			ClientInstrument ci= ciservice.findClientInstrumentById(ciid);
+			if(type=='S')
+				ci.setQuantity(ci.getQuantity()-quantity);
+			else
+				ci.setQuantity(ci.getQuantity()+quantity);
+			ciservice.updateClientInstrument(ci);
+		}
+		else {
+			ClientInstrument ci= new ClientInstrument();
+			ci.setClientInstrumentId(ciid);
+			ci.setClient(cservice.findClientById(cid));
+			ci.setInstrument(iservice.findInstrumentById(iid));
+			ci.setQuantity(quantity);
+			ciservice.updateClientInstrument(ci);
+		}
+		
+		return true;
+	}
+}

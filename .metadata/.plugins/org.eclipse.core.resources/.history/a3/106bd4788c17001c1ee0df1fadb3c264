@@ -1,0 +1,17 @@
+package com.dbs.ordermatching;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import com.dbs.ordermatching.repo.ClientRepository;
+
+@SpringBootApplication
+public class OrdermatchingApplication {
+
+	
+	public static void main(String[] args) {
+		SpringApplication.run(OrdermatchingApplication.class, args);
+	}
+
+}

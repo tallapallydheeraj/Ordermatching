@@ -1,0 +1,75 @@
+package com.dbs.ordermatching.model;
+
+ 
+
+import java.util.Date;
+
+ 
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+ 
+
+@Entity(name="instrument")
+public class Instrument {
+    @Id
+    @Column(name="instrumentid")
+    private String instrumentID;
+    @Column(name="instrumentname")
+    private String instrumentName;
+    @Column(name="facevalue")
+    private double faceValue;
+    @Column(name="expirydate")
+    private  Date expiryDate;
+    @Column(name="minquantity")
+    private int minQuantity;
+    public String getInstrumentID() {
+        return instrumentID;
+    }
+    public void setInstrumentID(String instrumentID) {
+        this.instrumentID = instrumentID;
+    }
+    public String getInstrumentName() {
+        return instrumentName;
+    }
+    public void setInstrumentName(String instrumentName) {
+        this.instrumentName = instrumentName;
+    }
+    public double getFaceValue() {
+        return faceValue;
+    }
+    public void setFaceValue(double faceValue) {
+        this.faceValue = faceValue;
+    }
+    public Date getExpiryDate() {
+        return expiryDate;
+    }
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
+    }
+    public int getMinQuantity() {
+        return minQuantity;
+    }
+    public void setMinQuantity(int minQuantity) {
+        this.minQuantity = minQuantity;
+    }
+    public Instrument() {
+        
+    }
+    public Instrument(String instrumentID, String instrumentName, double faceValue, Date expiryDate, int minQuantity) {
+        super();
+        this.instrumentID = instrumentID;
+        this.instrumentName = instrumentName;
+        this.faceValue = faceValue;
+        this.expiryDate = expiryDate;
+        this.minQuantity = minQuantity;
+    }
+    @Override
+    public String toString() {
+        return "Instrument [instrumentID=" + instrumentID + ", instrumentName=" + instrumentName + ", faceValue="
+                + faceValue + ", expiryDate=" + expiryDate + ", minQuantity=" + minQuantity + "]";
+    }
+
+}

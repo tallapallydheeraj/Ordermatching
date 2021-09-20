@@ -1,0 +1,27 @@
+package com.dbs.ordermatching.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Service;
+
+import com.dbs.ordermatching.model.Buy;
+import com.dbs.ordermatching.repo.BuyRepository;
+@Service
+public class BuyService {
+	@Autowired
+	private BuyRepository repo;
+	
+	@Query(value = "CALL INTO_BUY(:cid,:iid,:p,:q);", nativeQuery = true)
+	public void insertBuy(@Param("cid")String cid,@Param("iid")String iid,
+			@Param("p")Double p,@Param("q")Integer q) {}
+	
+	public List<Buy> getBuy(){
+		List<Buy> b=new ArrayList<>();
+		 this.repo.findAll().forEach(ele->b.add(ele));
+		 return b;
+	}
+}

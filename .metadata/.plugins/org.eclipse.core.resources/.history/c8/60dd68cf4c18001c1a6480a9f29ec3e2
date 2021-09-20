@@ -1,0 +1,22 @@
+package com.dbs.ordermatching;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+
+import com.dbs.ordermatching.service.BuyService;
+import com.dbs.ordermatching.service.SellService;
+
+@SpringBootApplication
+public class OrdermatchingApplication {
+
+	
+	public static void main(String[] args)throws Exception {
+		ApplicationContext context= SpringApplication.run(OrdermatchingApplication.class, args);
+		//SellService ser= context.getBean(SellService.class);
+		//System.out.println(ser.findClientsByCustodianId("CS001"));
+		//ser.insertSSell("DBS016", "I003",750.00, 75);
+		//System.out.println(ser.insertBuy());
+	}
+
+}

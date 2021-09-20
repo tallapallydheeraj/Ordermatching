@@ -1,0 +1,26 @@
+package com.dbs.ordermatching.model;
+
+import java.time.LocalDateTime;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+
+@Entity(name="buy")
+public class Buy {
+	@Id
+	@Column(name="buyid")
+	private String buyId;
+	@JoinColumn(name="clientid")
+	private Client client;
+	@JoinColumn(name="instrumentid")
+	private Instrument instrument;
+	private double price;
+	private int quantity;
+	@Column(name="remainingqty")
+	private int remainingQty;
+	@Column(name="buydate")
+	private LocalDateTime buyDate;
+	private int flag;
+}

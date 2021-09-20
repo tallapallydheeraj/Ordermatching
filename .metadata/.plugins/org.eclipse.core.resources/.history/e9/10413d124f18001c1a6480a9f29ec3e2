@@ -1,0 +1,80 @@
+package com.dbs.ordermatching.service;
+
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.dbs.ordermatching.model.Buy;
+import com.dbs.ordermatching.model.Sell;
+import com.dbs.ordermatching.repo.BuyRepository;
+import com.dbs.ordermatching.repo.SellRepository;
+
+@Service
+public class SellService {
+	
+	@Autowired
+	private BuyRepository brepo;
+	@Autowired
+	private SellRepository srepo;
+
+	@Autowired
+	private ClientInstrumentService ciservice;
+	@Autowired
+	private TradeHistoryService thservice;
+
+	public void insertSSell(String cid,String iid, Double p, Integer q) throws Exception {
+		int sid=(int)this.srepo.count()+1;
+		this.srepo.insertSell(sid,cid, iid, p, q);
+		List<Integer> l= this.srepo.sOrderMatching(iid, p);
+		int quan=q;
+		
+		//System.out.println(bid);
+		Sell s=this.srepo.findById(sid).get();
+		System.out.println("sell test" + s);
+		while(quan>0 && l.size()>0) {
+			Buy b= this.brepo.findById(l.get(0)).get();
+			if(b.getRemainingQty()>=s.getRemainingQty()) {
+				b.setRemainingQty(b.getRemainingQty()-s.getRemainingQty());
+				int bquant=b.getRemainingQty();
+				s.setRemainingQty(0);
+				s.setFlag(0);
+				if(b.getRemainingQty()==0)
+				{
+					b.setFlag(0);
+					ciservice.insertClientInstrument(b.getClient().getClientId(), b.getInstrument().getInstrumentId(), quan, 'B');
+				}
+				else {
+					ciservice.insertClientInstrument(b.getClient().getClientId(), b.getInstrument().getInstrumentId(), quan, 'B');
+				}
+				ciservice.insertClientInstrument(s.getClient().getClientId(), iid, quan, 'S');
+				thservice.insertTradeHistory(l.get(0),sid,  iid, p, quan);
+				quan=0;
+			}
+			else {//buyer>seller
+				s.setRemainingQty(s.getRemainingQty()-b.getRemainingQty());
+				int bquant=b.getRemainingQty();
+				quan=quan-bquant;
+				b.setRemainingQty(0);
+				b.setFlag(0);
+				ciservice.insertClientInstrument(b.getClient().getClientId(), iid, bquant, 'B');
+				ciservice.insertClientInstrument(s.getClient().getClientId(), iid, bquant, 'S');
+				thservice.insertTradeHistory( l.get(0),sid, iid, p, bquant);
+				
+			}
+			brepo.save(b);
+			srepo.save(s);
+			l.remove(0);
+		}
+	}
+	
+	public List<Sell> getSell(){
+		List<Sell> s=new ArrayList<>();
+		 this.srepo.findAll().forEach(ele->s.add(ele));
+		 return s;
+	}
+	
+	
+}

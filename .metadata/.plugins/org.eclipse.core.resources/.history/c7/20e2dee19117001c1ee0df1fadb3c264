@@ -1,0 +1,19 @@
+package com.dbs.ordermatching.repo;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import com.dbs.ordermatching.model.Buy;
+@Repository
+public interface BuyRepository extends JpaRepository<Buy, Integer> {
+	
+	@Query(value = "CALL INTO_BUY(:cid,:iid,:p,:q);", nativeQuery = true)
+	void insertBuy(@Param("cid") String cid,
+			@Param("iid") String iid,
+			@Param("p") String p,
+			@Param("q") String q);
+
+}

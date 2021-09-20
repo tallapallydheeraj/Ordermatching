@@ -1,0 +1,56 @@
+package com.dbs.ordermatching.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Service;
+
+import com.dbs.ordermatching.model.Buy;
+import com.dbs.ordermatching.model.Sell;
+import com.dbs.ordermatching.repo.BuyRepository;
+import com.dbs.ordermatching.repo.ClientInstrumentRepository;
+import com.dbs.ordermatching.repo.SellRepository;
+import com.dbs.ordermatching.repo.TradeHistoryRepository;
+@Service
+public class BuyService {
+	@Autowired
+	private BuyRepository brepo;
+	@Autowired
+	private SellRepository srepo;
+	@Autowired
+	private ClientInstrumentRepository cirepo;
+	@Autowired
+	private TradeHistoryRepository threpo;
+	@Autowired
+	private EntityManager manager;
+	/*@SuppressWarnings("unchecked")
+	public List<?> insertBuy(String cid, String iid, Double p, Integer q) {
+		return manager.createNamedStoredProcedureQuery("INTO_BUY").setParameter("cid", cid)
+		.setParameter("iid",iid)
+		.setParameter("p", p)
+		.setParameter("q", q)
+		.getResultList();
+		
+	}*/
+	public void insertBuy(String cid,String iid, Double p, Integer q) {
+		this.brepo.insertBuy(cid, iid, p, q);
+		System.out.println( this.brepo.bOrderMatching(iid, p));
+		/*
+		 * int quan=q; int bid=(int)this.brepo.count(); Buy b=this.brepo.getById(bid);
+		 * System.out.println(l); System.out.println(b);
+		 */
+		/*
+		 * while(quan>0 && l.size()>0) { if() }
+		 */	}
+	
+	public List<Buy> getBuy(){
+		List<Buy> b=new ArrayList<>();
+		 this.brepo.findAll().forEach(ele->b.add(ele));
+		 return b;
+	}
+}

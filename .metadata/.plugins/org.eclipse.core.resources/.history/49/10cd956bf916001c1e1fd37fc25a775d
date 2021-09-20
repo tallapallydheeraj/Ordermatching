@@ -1,0 +1,94 @@
+package com.dbs.ordermatching.model;
+
+
+import java.time.LocalDateTime;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+@Entity(name="trade_history")
+public class TradeHistroy {
+	@Id
+	@Column(name="tradeid")
+	private  String tradeId;
+	@OneToOne
+	private Buy buyer;
+	@OneToOne
+	private Sell seller;
+	@OneToOne
+	private Instrument instrument;
+	private Double price;
+	private int quantity;
+	@Column(name="tradedate")
+	private LocalDateTime tradeDate;
+	public TradeHistroy()
+	{
+		
+	}
+	
+	public TradeHistroy(String tradeId, Buy buyer, Sell seller, Instrument instrument, Double price, int quantity,
+			LocalDateTime tradeDate) {
+		super();
+		this.tradeId = tradeId;
+		this.buyer = buyer;
+		this.seller = seller;
+		this.instrument = instrument;
+		this.price = price;
+		this.quantity = quantity;
+		this.tradeDate = tradeDate;
+	}
+	
+	public String getTradeId() {
+		return tradeId;
+	}
+	public void setTradeId(String tradeId) {
+		this.tradeId = tradeId;
+	}
+	public Buy getBuyer() {
+		return buyer;
+	}
+	public void setBuyer(Buy buyer) {
+		this.buyer = buyer;
+	}
+	public Sell getSeller() {
+		return seller;
+	}
+	public void setSeller(Sell seller) {
+		this.seller = seller;
+	}
+	public Instrument getInstrument() {
+		return instrument;
+	}
+	public void setInstrument(Instrument instrument) {
+		this.instrument = instrument;
+	}
+	public Double getPrice() {
+		return price;
+	}
+	public void setPrice(Double price) {
+		this.price = price;
+	}
+	public int getQuantity() {
+		return quantity;
+	}
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+	public LocalDateTime getTradeDate() {
+		return tradeDate;
+	}
+	public void setTradeDate(LocalDateTime tradeDate) {
+		this.tradeDate = tradeDate;
+	}
+
+	@Override
+	public String toString() {
+		return "TradeHistroy [tradeId=" + tradeId + ", instrument=" + instrument + ", price=" + price + ", quantity="
+				+ quantity + ", tradeDate=" + tradeDate + "]";
+	}
+
+	
+
+}

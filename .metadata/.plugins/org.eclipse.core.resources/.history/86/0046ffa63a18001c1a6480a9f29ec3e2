@@ -1,0 +1,50 @@
+package com.dbs.ordermatching.service;
+
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.dbs.ordermatching.model.Client;
+import com.dbs.ordermatching.model.ClientInstrument;
+import com.dbs.ordermatching.repo.ClientInstrumentRepository;
+import com.dbs.ordermatching.repo.ClientRepository;
+
+@Service
+public class ClientInstrumentService {
+
+	@Autowired
+	private ClientInstrumentRepository repo;
+	public ClientInstrument findClientInstrumentById(String ciid) throws Exception {
+
+		ClientInstrument clientInstrument = null;
+		try {
+
+			Optional<ClientInstrument> opt = this.repo.findById(ciid);
+			if(opt.isPresent())
+				clientInstrument = opt.get();
+			
+		}
+		catch(IllegalArgumentException e)
+		{
+			throw new IllegalArgumentException("id cannot be null, Please provide ID");
+		}
+		catch(Exception e)
+		{
+			throw new Exception(e);
+		}
+		return clientInstrument;
+	}
+	public boolean existsById(String ciid) {
+		return this.repo.existsById(ciid);
+	}
+	public boolean updateClientInstrument(ClientInstrument ci) {
+		
+			ClientInstrument clientInstrument= repo.save(ci);
+				
+			if(clientInstrument==null)
+				return false;
+			return true;
+		
+	}
+}

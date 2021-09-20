@@ -1,0 +1,21 @@
+package com.dbs.ordermatching.rest;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.dbs.ordermatching.service.InstrumentService;
+
+@RestController
+@RequestMapping("instruments")
+public class InstrumentRestController {
+	@Autowired
+	private InstrumentService iservice;
+	@GetMapping
+	public List<String> getInstrumentIds() {
+		return this.iservice.getAllInstrumentIds();
+	}
+}

@@ -1,0 +1,63 @@
+package com.dbs.ordermatching.model;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+import javax.persistence.OneToOne;
+
+@Entity(name="client_instrument")
+public class ClientInstrument {
+	@Id
+	@Column(name="clientinstrumentid")
+	private int clientInstrumentId;
+	@Column(name="clientid")
+	@OneToOne
+	private Client clientId;
+	@Column(name="instrumentid")
+	private Instrument instrumentId;
+	private int quantity;
+	
+	public ClientInstrument() {
+		
+	}
+	public ClientInstrument(int clientInstrumentId, Client clientId, Instrument instrumentId, int quantity) {
+		super();
+		this.clientInstrumentId = clientInstrumentId;
+		this.clientId = clientId;
+		this.instrumentId = instrumentId;
+		this.quantity = quantity;
+	}
+	public int getClientInstrumentId() {
+		return clientInstrumentId;
+	}
+	public void setClientInstrumentId(int clientInstrumentId) {
+		this.clientInstrumentId = clientInstrumentId;
+	}
+	public Client getClientId() {
+		return clientId;
+	}
+	public void setClientId(Client clientId) {
+		this.clientId = clientId;
+	}
+	public Instrument getInstrumentId() {
+		return instrumentId;
+	}
+	public void setInstrumentId(Instrument instrumentId) {
+		this.instrumentId = instrumentId;
+	}
+	public int getQuantity() {
+		return quantity;
+	}
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+	@Override
+	public String toString() {
+		return "ClientInstrument [clientInstrumentId=" + clientInstrumentId + ", instrumentId=" + instrumentId
+				+ ", quantity=" + quantity + "]";
+	}
+	
+	
+
+}
